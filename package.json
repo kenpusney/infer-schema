@@ -1,0 +1,9 @@
+{
+  "name": "plain-schema",
+  "version": "1.0.0",
+  "description": "A just enough schema builder and validator",
+  "main": "schema.js",
+  "repository": "github.com/kenpusney/schema",
+  "author": "KimmyLeo",
+  "license": "MIT"
+}
