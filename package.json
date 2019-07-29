@@ -1,6 +1,6 @@
 {
   "name": "infer-schema",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A just enough schema builder and validator",
   "main": "schema.js",
   "repository": "github.com/kenpusney/schema",
