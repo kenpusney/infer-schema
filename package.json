@@ -5,5 +5,8 @@
   "main": "schema.js",
   "repository": "github.com/kenpusney/schema",
   "author": "KimmyLeo",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "node schema.test.js"
+  }
 }

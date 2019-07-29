@@ -44,7 +44,7 @@ class Schema {
     }
 
     static union(...types) {
-        return new Union(types);
+        return new Union(...types);
     }
 }
 
@@ -71,6 +71,6 @@ class Union extends Schema {
     }
 }
 
-export default {
+module.exports = {
     Schema, Union
 }
