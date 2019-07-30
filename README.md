@@ -1,5 +1,7 @@
 # Schema
 
+See http://kimleo.net/infer for type system details.
+
 ### Example
 ```js
 const Phone = new Schema({
