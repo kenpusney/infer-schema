@@ -1,5 +1,5 @@
 
-const { Schema, Union } = require("./schema")
+const { Schema, Union, Nullable, Any, Bottom } = require("./schema")
 
 class AssertionError extends Error {
     constructor(message = "Assertion error!") {
@@ -58,4 +58,39 @@ function assertThrows(action, ex = Error) {
     simpleUnion.validate("abc");
     simpleUnion.validate(undefined);
     assertThrows(() => simpleUnion(true), TypeError);
+
+    const simpleNull = new Schema(null);
+    simpleNull.validate(null);
+    simpleNull.validate(undefined);
+    assertThrows(() => simpleNull.validate(123), TypeError);
+    assertThrows(() => simpleNull.validate(undefined, true), TypeError);
+
+    const simpleNullable = new Schema(new Nullable(Number))
+    simpleNullable.validate(null);
+    simpleNullable.validate(undefined);
+    simpleNullable.validate(123);
+    assertThrows(() => simpleNullable.validate("abc"), TypeError);
+    assertThrows(() => simpleNullable.validate(undefined, true), TypeError);
+
+    const simpleAny = new Schema(new Any());
+
+    simpleAny.validate(null);
+    simpleAny.validate(123);
+    simpleAny.validate(undefined);
+    simpleAny.validate("abc");
+    simpleAny.validate({});
+    simpleAny.validate([])
+    assertThrows(() => simpleAny.validate(undefined, true), TypeError);
+
+    const simpleBottom = new Schema(new Bottom());
+
+    assertThrows(() => simpleBottom.validate(1), TypeError);
+    assertThrows(() => simpleBottom.validate(true), TypeError);
+    assertThrows(() => simpleBottom.validate(false), TypeError);
+    assertThrows(() => simpleBottom.validate("abc"), TypeError);
+    assertThrows(() => simpleBottom.validate(null), TypeError);
+    assertThrows(() => simpleBottom.validate({}), TypeError);
+    assertThrows(() => simpleBottom.validate([]), TypeError);
+    assertThrows(() => simpleBottom.validate(undefined), TypeError);
+
 })();

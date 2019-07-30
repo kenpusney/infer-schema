@@ -1,9 +1,14 @@
 function validate(schema, value, strict = false,  key = undefined) {
     if (value === undefined) {
-        if (strict) {
+        if (strict || schema instanceof Bottom) {
             throw new TypeError(`undefined value for ${key}: ${schema}`)
         } else {
             return;
+        }
+    }
+    if (schema === null) {
+        if (value !== null) {
+            throw new TypeError("Object is not a null value");
         }
     }
     if (schema instanceof Schema) {
@@ -48,6 +53,27 @@ class Schema {
     }
 }
 
+class Bottom extends Schema {
+    constructor() {
+        super(null);
+    }
+
+    validate(object, strict = false) {
+        throw new TypeError("Bottom!");
+    }
+}
+
+class Any extends Schema {
+    constructor() {
+        super(null);
+    }
+
+    validate(object, strict = false) {
+        if (object === undefined && strict) {
+            throw new TypeError("undefined value is not allowed in strict mode for `any` type");
+        }
+    }
+}
 
 class Union extends Schema {
     constructor(...types) {
@@ -71,6 +97,13 @@ class Union extends Schema {
     }
 }
 
+class Nullable extends Union {
+
+    constructor(...types) {
+        super(null, ...types);
+    }
+}
+
 module.exports = {
-    Schema, Union
+    Schema, Union, Nullable, Any, Bottom
 }
