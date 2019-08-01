@@ -24,7 +24,7 @@ function assertThrows(action, ex = Error) {
 }
 
 
-(() => {
+(function testSchema() {
     
     const simpleNumber = new Schema(Number);
     simpleNumber.validate(1);
@@ -93,4 +93,38 @@ function assertThrows(action, ex = Error) {
     assertThrows(() => simpleBottom.validate([]), TypeError);
     assertThrows(() => simpleBottom.validate(undefined), TypeError);
 
+    
+    const simpleCustomize = new Schema(Boolean, { validate: (x) => !x });
+    simpleCustomize.validate(false);
+    assertThrows(() => simpleCustomize.validate(true), TypeError);
+
+    const simpleMobileValidator = new Schema(String, { validate: (s) => /^1\d{10}$/.test(s) } );
+
+    () => simpleMobileValidator.validate("13688888888");
+    assertThrows(() => simpleMobileValidator.validate("1234567890"), TypeError);
+    assertThrows(() => simpleMobileValidator.validate("02899999999"), TypeError);
+    assertThrows(() => simpleMobileValidator.validate(13888888888), TypeError);
+})();
+
+(function testDeclVal() {
+
+    assert(new Schema(Number).declval() === 0);
+    assert(new Schema(Boolean).declval() === false);
+    assert(new Schema(String).declval() === "");
+    assert(new Schema(null).declval() === null);
+    assert(new Schema(undefined).declval() === undefined);
+
+    const simpleObject = new Schema({ a: Number, b: { c: String, d: null } }).declval()
+    assert(simpleObject.a === 0);
+    assert(simpleObject.b.c === "");
+    assert(simpleObject.b.d === null);
+
+    assert(new Schema([Number]).declval().length === 0);
+
+    assert(new Schema(new Union(Number, String)).declval() === 0);
+
+    assert(new Schema(new Any()).declval() === null);
+    assert(new Schema(new Nullable(Number)).declval() === null);
+
+    assert(new Schema(Number, { declval: () => 1}).declval() === 1)
 })();

@@ -39,13 +39,59 @@ function validate(schema, value, strict = false,  key = undefined) {
     }
 }
 
+function declval(schema) {
+    if (schema === null || schema === undefined) {
+        return schema;
+    }
+    if (schema instanceof Schema) {
+        return schema.declval();
+    }
+    
+    if (schema instanceof Function) {
+        if ([String, Number, Boolean].includes(schema)) {
+            switch(schema.name.toLowerCase()) {
+                case "string": return "";
+                case "number": return 0;
+                case "boolean": return false;
+            }
+        }
+    }
+
+    if (schema instanceof Array) {
+        return [];
+    }
+    
+    if (schema instanceof Object) {
+        const value = Object.create({});
+        Object.keys(schema).forEach((key) => {
+            const subSchema = schema[key];
+            value[key] = declval(subSchema);
+        });
+        return value;
+    }
+}
+
 class Schema {
-    constructor(schema) {
+    constructor(schema, { declval, validate } = {}) {
         this.schema = schema;
+        this.options = { declval, validate };
     }
 
     validate(object, strict = false) {
         validate(this.schema, object, strict);
+
+        if (this.options.validate) {
+            if (!this.options.validate(object)) {
+                throw new TypeError("Customized validator throws an error");
+            }
+        }
+    }
+
+    declval() {
+        if (this.options.declval) {
+            return this.options.declval();
+        }
+        return declval(this.schema);
     }
 
     static union(...types) {
@@ -61,6 +107,10 @@ class Bottom extends Schema {
     validate(object, strict = false) {
         throw new TypeError("Bottom!");
     }
+
+    declval() {
+        throw new TypeError("Bottom!");
+    }
 }
 
 class Any extends Schema {
@@ -72,6 +122,10 @@ class Any extends Schema {
         if (object === undefined && strict) {
             throw new TypeError("undefined value is not allowed in strict mode for `any` type");
         }
+    }
+
+    declval() {
+        return null;
     }
 }
 
@@ -94,6 +148,10 @@ class Union extends Schema {
         if (!result) {
             throw new TypeError(`value {${object}} cannot match union schema ${this.schema}, errors: [${resultList}]`);
         }
+    }
+
+    declval() {
+        return declval(this.types[0]);
     }
 }
 
