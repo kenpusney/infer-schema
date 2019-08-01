@@ -128,3 +128,32 @@ function assertThrows(action, ex = Error) {
 
     assert(new Schema(Number, { declval: () => 1}).declval() === 1)
 })();
+
+(function testIntegration() {
+
+    const DOB = new Schema(String, {
+        declval: () => "2019-07-10",
+        validate: (d) => /\d{4}-\d{2}-\d{2}/.test(d)
+    });
+
+    const User = new Schema({
+        name: String,
+        password: String,
+        dateOfBirth: DOB,
+        contact: {
+            email: String,
+            phone: String,
+        }
+    });
+
+    const user = User.declval();
+
+    assert(user.name === "");
+    assert(user.password === "");
+    assert(user.dateOfBirth === "2019-07-10");
+    assert(user.contact.email === "");
+    assert(user.contact.phone === "");
+
+    User.validate(user);
+
+})();
